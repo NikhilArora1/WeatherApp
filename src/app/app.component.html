@@ -1,0 +1,12 @@
+<h2>Array of inputs:</h2>
+<div>{{locations}}</div>
+
+<h2>Output</h2>
+<div *ngFor="let weather of weathers" class="location-container">
+    <h4>For {{weather.name}}</h4>
+    <div>Weather on {{weather.date}} at {{weather.time}} - {{weather.description}}</div>
+    <div>Temperature in Fahrenheit:</div>
+    <div *ngFor="let item of weather.temperature | keyvalue">
+        <span>{{item.key}}: {{item.value}}</span>
+    </div>
+</div>
