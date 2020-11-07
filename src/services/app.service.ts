@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 @Injectable()
 export class AppService {
     private weatherApi;
@@ -11,8 +11,9 @@ export class AppService {
         this.apiKey = 'dbf8e659bff8e8b438d3eb9f3afaa00f';
     }
 
-    getWeather(zip) {
-        return this.http.get(`${this.weatherApi}?zip=${zip}&appid=${this.apiKey}&units=Imperial`)
+    getWeather(location, type): Observable<any> {
+        const paramToPass = type === 'zip' ? 'zip' : 'q';
+        return this.http.get(`${this.weatherApi}?${paramToPass}=${location}&appid=${this.apiKey}&units=Imperial`)
         .pipe(
             catchError(this.handleError)
         );
@@ -27,7 +28,6 @@ export class AppService {
             // server-side error
             errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
         }
-        console.log(errorMessage);
         return throwError(errorMessage);
     }
 }

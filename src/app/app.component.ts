@@ -8,16 +8,47 @@ import { AppService } from 'src/services/app.service';
   providers: [AppService]
 })
 export class AppComponent implements OnInit {
-  private zip = '10001';
+  locations = ['94105', '10001', 'Tokyo'];
+  weathers = [];
   constructor(private appService: AppService) { }
 
   ngOnInit(): void {
-    this.appService.getWeather(this.zip).subscribe((res: any) => {
-      const temp = res.main;
-      const time = new Date(res.dt * 1000).toTimeString();
-      console.log(`Weather in ${res.name} at ${time} is expected to be ${res.weather[0].description}`);
-      console.log(`Temperature in Fahrenheit`, temp);
+    this.locations.forEach(location => {
+      this.getWeather(location);
+    });
+  }
+
+  getWeather(location): void {
+    let typeOfInput: string;
+    if (Number(location)) {
+      typeOfInput = 'zip';
+    } else {
+      typeOfInput = 'city';
+    }
+    this.appService.getWeather(location, typeOfInput).subscribe((res: any) => {
+      const locationDate = this.getLocationTime(res.timezone);
+      const weather = {
+        name: res.name,
+        date: locationDate.toDateString(),
+        time: locationDate.getHours() + ':' + locationDate.getMinutes() + ':' + locationDate.getSeconds(),
+        description: res.weather[0].description,
+        temperature: res.main
+      };
+      this.weathers.push(weather);
+      console.log(`For ${weather.name}`);
+      console.log(`Weather in ${weather.name} at ${weather.time} - ${weather.description}`);
+      console.log(`Temperature in Fahrenheit`, weather.temperature);
       console.log('-----------------------------');
     });
+  }
+
+  getLocationTime(timezone): Date {
+      const currentDate = new Date(); // get the current time
+      const currentTzOffset = -currentDate.getTimezoneOffset() / 60; // in hours
+      const deltaTzOffset = (timezone / 3600) - currentTzOffset; // timezone diff
+      const nowTimestamp = currentDate.getTime(); // get the number of milliseconds since unix epoch
+      const deltaTzOffsetMilli = deltaTzOffset * 1000 * 60 * 60; // convert hours to milliseconds (tzOffsetMilli*1000*60*60)
+      const outputDate = new Date(nowTimestamp + deltaTzOffsetMilli);
+      return outputDate;
   }
 }
